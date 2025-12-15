@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pedido Confirmado - CAD Assets Store</title>
+    <style>
+        :root{--bg:#0a0a0a;--panel:rgba(255,255,255,0.03);--accent1:#667eea;--accent2:#764ba2;--muted:#888;--success:#4ade80}
+        *{box-sizing:border-box}
+        body{font-family:'Segoe UI',Tahoma,Arial;background:var(--bg);color:#fff;margin:0;padding:0;text-align:center}
+        header{position:fixed;top:0;width:100%;padding:.8rem 3%;background:rgba(10,10,10,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.06);z-index:100;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        main{padding:120px 3% 40px;max-width:800px;margin:0 auto}
+        .success-icon{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--success),rgba(74,222,128,0.2));display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;font-size:3rem}
+        h1{font-size:2.5rem;margin:0 0 1rem;background:linear-gradient(135deg,#fff,#b0b0b0);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .order-number{background:var(--panel);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:2rem;margin:2rem 0;display:inline-block;min-width:300px}
+        .order-number h2{margin:0 0 1rem;font-size:1.5rem;color:var(--success)}
+        .order-number p{margin:0;font-size:1.2rem;font-weight:700;color:#fff}
+        .message{background:var(--panel);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:2rem;margin:2rem 0;text-align:left}
+        .message h3{margin:0 0 1rem;font-size:1.3rem}
+        .message p{margin:0 0 1rem;color:#b0b0b0;line-height:1.6}
+        .message ul{list-style:none;padding:0;margin:0;text-align:left}
+        .message li{padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between}
+        .message li:last-child{border-bottom:none}
+        .actions{display:flex;gap:1rem;justify-content:center;margin-top:3rem;flex-wrap:wrap}
+        .btn{cursor:pointer;border:none;border-radius:10px;padding:1rem 2rem;font-weight:600;font-size:1rem;transition:all .2s;text-align:center;text-decoration:none;display:inline-block}
+        .btn-primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.3)}
+        .btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff}
+        .btn-secondary:hover{border-color:var(--accent1);color:var(--accent1)}
+        .email-notice{background:rgba(102,126,234,0.1);border:1px solid rgba(102,126,234,0.3);border-radius:8px;padding:1rem;margin:2rem 0;text-align:left}
+        .email-notice h4{margin:0 0 .5rem;color:var(--accent1)}
+        .email-notice p{margin:0;color:#b0b0b0;font-size:.9rem}
+        @media(max-width:768px){.actions{flex-direction:column}.btn{width:100%}}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">trEdion CAD Assets Store</div>
+    </header>
+
+    <main>
+        <div class="success-icon">✓</div>
+        <h1>¡Pedido confirmado!</h1>
+        <p style="color:#b0b0b0;font-size:1.2rem;margin-bottom:2rem">Gracias por tu compra. Tu pedido ha sido procesado exitosamente.</p>
+
+        <div class="order-number">
+            <h2>Número de pedido</h2>
+            <p id="order-number">ORD-1234567890</p>
+        </div>
+
+        <div class="email-notice">
+            <h4>📧 Revisa tu email</h4>
+            <p>Te hemos enviado un email de confirmación con los detalles de tu pedido y las instrucciones para descargar tus archivos.</p>
+        </div>
+
+        <div class="message">
+            <h3>¿Qué sucede ahora?</h3>
+            <ul>
+                <li><span>Procesamiento del pago</span><span style="color:var(--success)">✓ Completado</span></li>
+                <li><span>Confirmación por email</span><span style="color:var(--success)">✓ Enviado</span></li>
+                <li><span>Preparación de archivos</span><span style="color:#ffa500">⏳ En proceso (24h)</span></li>
+                <li><span>Envío de link de descarga</span><span style="color:#ffa500">⏳ Próximamente</span></li>
+            </ul>
+        </div>
+
+        <div class="message">
+            <h3>Detalles del pedido</h3>
+            <div id="order-details"></div>
+            <div style="border-top:1px solid rgba(255,255,255,0.04);padding-top:1rem;margin-top:1rem">
+                <div style="display:flex;justify-content:space-between;font-weight:700">
+                    <span>Total pagado:</span>
+                    <span style="color:var(--accent1)" id="total-amount">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="catalog.html" class="btn btn-primary">Continuar comprando</a>
+            <a href="xd.html" class="btn btn-secondary">Volver al inicio</a>
+        </div>
+    </main>
+
+    <script>
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderNumber = urlParams.get('order');
+
+            if(!orderNumber) {
+                window.location.href = 'xd.html';
+                return;
+            }
+
+            document.getElementById('order-number').textContent = orderNumber;
+
+            // Load order details from localStorage
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders.find(o => o.orderNumber === orderNumber);
+
+            if(order) {
+                renderOrderDetails(order);
+            } else {
+                document.getElementById('order-details').innerHTML = '<p style="color:#888">No se pudieron cargar los detalles del pedido.</p>';
+            }
+        }
+
+        function renderOrderDetails(order) {
+            const container = document.getElementById('order-details');
+            container.innerHTML = '';
+
+            order.items.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.style.cssText = 'display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04)';
+                itemEl.innerHTML = `
+                    <div>
+                        <div style="font-weight:700;color:#fff">${item.name}</div>
+                        <div style="color:#888;font-size:.9rem">${item.format} • Cantidad: ${item.quantity}</div>
+                    </div>
+                    <div style="color:var(--accent1);font-weight:700">$${(item.price * item.quantity).toFixed(2)}</div>
+                `;
+                container.appendChild(itemEl);
+            });
+
+            document.getElementById('total-amount').textContent = '$' + order.payment.amount.toFixed(2);
+        }
+
+        init();
+    </script>
+</body>
+</html>

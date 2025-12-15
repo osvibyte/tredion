@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>trEdion Store - Modelos 3D y Planos Profesionales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .cart-icon:hover {
+            color: #667eea;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Search input in header */
+        .search-wrapper {
+            margin-left: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 0.6rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            width: 320px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 6px 20px rgba(102,126,234,0.12);
+            border-color: #667eea;
+            background: rgba(255,255,255,0.04);
+        }
+        /* Cart Modal */
+        .cart-modal {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 999;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .cart-modal.active {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-header h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+        }
+
+        .cart-close {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .cart-close:hover {
+            color: #667eea;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .cart-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-info h3 {
+            color: #ffffff;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-info p {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-price {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .qty-btn {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+            color: #667eea;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .qty-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .qty-display {
+            color: #ffffff;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .cart-item-remove:hover {
+            color: #ff8787;
+        }
+
+        .cart-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #888;
+            text-align: center;
+        }
+
+        .cart-empty p {
+            margin-top: 1rem;
+        }
+
+        .cart-footer {
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .cart-summary {
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        .cart-summary-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.3rem;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .cart-summary-total .amount {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .cart-actions .btn {
+            flex: 1;
+            padding: 0.8rem 1.5rem;
+            text-align: center;
+        }
+
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 998;
+        }
+
+        .cart-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 8rem 5% 4rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+            top: -250px;
+            right: -250px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(118, 75, 162, 0.3) 0%, transparent 70%);
+            bottom: -200px;
+            left: -200px;
+            animation: float 6s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 30px) scale(1.1); }
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text p {
+            font-size: 1.3rem;
+            color: #b0b0b0;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .hero-visual {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .visual-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .visual-card:nth-child(1) { animation-delay: 0.1s; }
+        .visual-card:nth-child(2) { animation-delay: 0.2s; }
+        .visual-card:nth-child(3) { animation-delay: 0.3s; }
+        .visual-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .visual-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #667eea;
+        }
+
+        .visual-card svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .visual-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        .visual-card p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 5%;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            text-align: center;
+        }
+
+        .stat-item h2 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        /* Categories Section */
+        .categories {
+            padding: 6rem 5%;
+            background: #0a0a0a;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .categories-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .category-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .category-icon {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-card p {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-card .asset-count {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Featured Assets */
+        .featured {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+        }
+
+        .featured-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .asset-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-10px);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .asset-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-image svg {
+            width: 120px;
+            height: 120px;
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+
+        .asset-card:hover .asset-image svg {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+
+        .asset-info {
+            padding: 2rem;
+        }
+
+        .asset-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .asset-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
+        }
+
+        .asset-info p {
+            color: #888;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .asset-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .asset-format {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .asset-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Custom Orders */
+        .custom-orders {
+            padding: 6rem 5%;
+            background: #0a0a0a;
+        }
+
+        .custom-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .custom-text h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .custom-text p {
+            color: #b0b0b0;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .features-list li {
+            padding: 1rem 0;
+            color: #b0b0b0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .custom-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 5% 2rem;
+            background: #050505;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            font-size: 1.3rem;
+        }
+
+        .footer-section p {
+            color: #888;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-section ul li a {
+            color: #888;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section ul li a:hover {
+            color: #667eea;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-text h1 {
+                font-size: 2.8rem;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .custom-content {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-text h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-text p {
+                font-size: 1.1rem;
+            }
+
+            .hero-visual {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .categories-grid,
+            .featured-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Product detail modal styles */
+        .product-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 99999; }
+        .product-modal.active { display: flex; }
+        .product-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); }
+        .product-modal-panel { position: relative; z-index: 2; width: min(900px,95%); max-height: 90vh; overflow:auto; background: rgba(10,10,10,0.95); border:1px solid rgba(255,255,255,0.06); padding:1.2rem; border-radius:12px; }
+        .product-modal-body { display: grid; grid-template-columns: 1fr 1fr; gap:1rem; }
+        .product-image-placeholder { height:220px; border-radius:8px; background: linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12)); display:flex; align-items:center; justify-content:center; font-size:3rem; }
+        .product-info h3 { margin:0 0 .5rem; }
+        .product-info p { color: #b0b0b0; }
+        @media(max-width:700px){ .product-modal-body{ grid-template-columns: 1fr } }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">trEdion CAD Assets Store</div>
+            <ul class="nav-links">
+                <li><a href="#home">Inicio</a></li>
+                <li><a href="#categories">Catálogo</a></li>
+                <li><a href="#featured">Destacados</a></li>
+                <li><a href="#custom">Pedidos</a></li>
+                <li><a href="#contact">Contacto</a></li>
+            </ul>
+            <div class="search-wrapper">
+                <input id="product-search" class="search-input" type="search" placeholder="Buscar assets, formato o categoría..." aria-label="Buscar productos">
+            </div>
+            <div class="cart-icon" onclick="toggleCart()">
+                🛒
+                <span class="cart-count" id="cart-count" style="display: none;">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Cart Modal -->
+    <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-modal" id="cart-modal">
+        <div class="cart-header">
+            <h2>Mi Carrito</h2>
+            <button class="cart-close" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <div class="cart-empty">
+                <div style="font-size: 3rem;">🛍️</div>
+                <p>Tu carrito está vacío</p>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-summary">
+                <div class="cart-summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>Impuesto (10%):</span>
+                    <span id="tax">$0.00</span>
+                </div>
+            </div>
+            <div class="cart-summary-total">
+                <span>Total:</span>
+                <span class="amount" id="total">$0.00</span>
+            </div>
+            <div class="cart-actions" style="margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="toggleCart()">Continuar Comprando</button>
+                <button class="btn btn-primary" onclick="checkout()">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-modal" class="product-modal" aria-hidden="true">
+        <div class="product-modal-overlay" onclick="closeProductModal()"></div>
+        <div class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+                <h2 id="product-modal-title">Detalle del producto</h2>
+                <button class="cart-close" onclick="closeProductModal()">✕</button>
+            </div>
+            <div class="product-modal-body">
+                <div>
+                    <div id="xd-product-image" class="product-image-placeholder">🧩</div>
+                </div>
+                <div class="product-info">
+                    <h3 id="xd-product-name"></h3>
+                    <div id="xd-product-meta" style="color:#888;margin-bottom:.6rem"></div>
+                    <p id="xd-product-desc"></p>
+                    <div class="product-price" id="xd-product-price" style="margin-top:1rem;font-weight:700;color:#667eea"></div>
+                    <div style="margin-top:1rem;display:flex;gap:.6rem">
+                        <button id="xd-modal-add-btn" class="btn btn-primary">Agregar al Carrito</button>
+                        <button class="btn btn-secondary" onclick="closeProductModal()">Cerrar</button>
+                    </div>
+                    <button id="xd-view-details-btn" class="btn btn-ghost" style="width:100%;margin-top:.8rem;background:transparent;border:1px solid rgba(102,126,234,0.3);color:#667eea">Ver detalles completos →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Assets CAD <span class="highlight">Profesionales</span> para tus Proyectos</h1>
+                <p>Modelos 3D y planos técnicos de alta calidad en SolidWorks y AutoCAD. Listos para usar o personalizados según tus necesidades.</p>
+                <div class="cta-buttons">
+                    <a href="#categories" class="btn btn-primary">Explorar Catálogo</a>
+                    <a href="#custom" class="btn btn-secondary">Solicitar Personalizado</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="visual-card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+                    </svg>
+                    <h3>Planos Eléctricos</h3>
+                    <p>Domésticos e industriales</p>
+                </div>
+                <div class="visual-card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#764ba2" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    <h3>Piezas Mecánicas</h3>
+                    <p>Modelos detallados</p>
+                </div>
+                <div class="visual-card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                        <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                    </svg>
+                    <h3>Transformadores</h3>
+                    <p>3D y documentación</p>
+                </div>
+                <div class="visual-card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#764ba2" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                    </svg>
+                    <h3>Componentes</h3>
+                    <p>Biblioteca extensa</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stats-container">
+            <div class="stat-item">
+                <h2>500+</h2>
+                <p>Assets Disponibles</p>
+            </div>
+            <div class="stat-item">
+                <h2>2</h2>
+                <p>Formatos CAD</p>
+            </div>
+            <div class="stat-item">
+                <h2>24h</h2>
+                <p>Entrega Rápida</p>
+            </div>
+            <div class="stat-item">
+                <h2>100%</h2>
+                <p>Calidad Garantizada</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories" id="categories">
+        <div class="section-header">
+            <h2>Nuestro Catálogo</h2>
+            <p>Explora nuestra amplia selección de assets CAD organizados por categorías</p>
+        </div>
+        <div class="categories-grid">
+            <div class="category-card" onclick="openCatalogCategory('Planos Eléctricos')">
+                <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                <h3>Planos Eléctricos</h3>
+                <p>Instalaciones domésticas completas, tableros de distribución, circuitos empresariales y especificaciones técnicas detalladas.</p>
+                <span class="asset-count">120+ assets disponibles</span>
+            </div>
+
+            <div class="category-card" onclick="openCatalogCategory('Piezas Mecánicas')">
+                <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="#764ba2" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+                </svg>
+                <h3>Piezas Mecánicas</h3>
+                <p>Engranajes, ejes, cojinetes, poleas, tornillos y componentes de maquinaria industrial con tolerancias precisas.</p>
+                <span class="asset-count">200+ assets disponibles</span>
+            </div>
+
+            <div class="category-card" onclick="openCatalogCategory('Transformadores')">
+                <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                </svg>
+                <h3>Transformadores</h3>
+                <p>Modelos 3D completos, planos técnicos, especificaciones eléctricas y diagramas de conexión para diferentes potencias.</p>
+                <span class="asset-count">80+ assets disponibles</span>
+            </div>
+
+            <div class="category-card" onclick="openCatalogCategory('Tableros Eléctricos')">
+                <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="#764ba2" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <h3>Tableros Eléctricos</h3>
+                <p>Gabinetes, paneles de control, distribuidores y armarios eléctricos con componentes detallados.</p>
+                <span class="asset-count">60+ assets disponibles</span>
+            </div>
+
+            <div class="category-card" onclick="openCatalogCategory('Sistemas de Tuberías')">
+                <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+                <h3>Sistemas de Tuberías</h3>
+                <p>Válvulas, codos, tees, bridas, conexiones y accesorios para sistemas hidráulicos y neumáticos.</p>
+                <span class="asset-count">150+ assets disponibles</span>
+            </div>
+
+            <div class="category-card" onclick="openCatalogCategory('Motores Eléctricos')">
+                <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="#764ba2" stroke-width="2">
+                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                    <rect x="9" y="9" width="6" height="6"/>
+                    <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/>
+</svg>
+<h3>Motores Eléctricos</h3>
+<p>Motores AC/DC, servomotores, reductores y especificaciones técnicas completas para diferentes aplicaciones.</p>
+<span class="asset-count">90+ assets disponibles</span>
+</div>
+</div>
+    <div style="text-align:center; margin-top:2rem;">
+        <a href="catalog.html" class="btn btn-secondary" style="display:inline-block;">Ver catálogo completo</a>
+    </div>
+</section><!-- Featured Assets -->
+<section class="featured" id="featured">
+    <div class="section-header">
+        <h2>Assets Destacados</h2>
+        <p>Los modelos más populares y descargados de nuestra biblioteca</p>
+    </div>
+    <div class="featured-grid">
+        <div class="asset-card">
+            <div class="asset-image">
+                <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=300" alt="Plano Eléctrico" style="width:100%;height:100%;object-fit:cover;border-radius:8px">
+            </div>
+            <div class="asset-info">
+                <span class="asset-badge">AutoCAD</span>
+                <h3>Plano Eléctrico Casa 3 Dormitorios</h3>
+                <p>Instalación eléctrica completa, incluye iluminación, tomacorrientes, tablero principal y circuitos de seguridad.</p>
+                <div class="asset-meta">
+                    <span class="asset-format">DWG + PDF</span>
+                    <span class="asset-price">$29.99</span>
+                </div>
+                <div style="display:flex;gap:.5rem;margin-top:1rem">
+                    <button class="btn btn-ghost" onclick="openProductModalXD('Plano Eléctrico Casa 3 Dormitorios',29.99,'AutoCAD')">Detalles</button>
+                    <button class="btn btn-primary" style="flex:1" onclick="addToCart('Plano Eléctrico Casa 3 Dormitorios', 29.99, 'AutoCAD')">Agregar al Carrito</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="asset-card">
+            <div class="asset-image">
+                <img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300" alt="Transformador" style="width:100%;height:100%;object-fit:cover;border-radius:8px">
+            </div>
+            <div class="asset-info">
+                <span class="asset-badge">SolidWorks</span>
+                <h3>Transformador Trifásico 500 KVA</h3>
+                <p>Modelo 3D completo con ensamblaje, planos técnicos, especificaciones eléctricas y lista de materiales.</p>
+                <div class="asset-meta">
+                    <span class="asset-format">SLDPRT + PDF</span>
+                    <span class="asset-price">$79.99</span>
+                </div>
+                <div style="display:flex;gap:.5rem;margin-top:1rem">
+                    <button class="btn btn-ghost" onclick="openProductModalXD('Transformador Trifásico 500 KVA',79.99,'SolidWorks')">Detalles</button>
+                    <button class="btn btn-primary" style="flex:1" onclick="addToCart('Transformador Trifásico 500 KVA', 79.99, 'SolidWorks')">Agregar al Carrito</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="asset-card">
+            <div class="asset-image">
+                <img src="https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=300" alt="Engranajes" style="width:100%;height:100%;object-fit:cover;border-radius:8px">
+            </div>
+            <div class="asset-info">
+                <span class="asset-badge">SolidWorks</span>
+                <h3>Set Engranajes Industriales</h3>
+                <p>Biblioteca con 20 engranajes rectos y helicoidales, diferentes módulos y número de dientes.</p>
+                <div class="asset-meta">
+                    <span class="asset-format">SLDPRT</span>
+                    <span class="asset-price">$49.99</span>
+                </div>
+                <div style="display:flex;gap:.5rem;margin-top:1rem">
+                    <button class="btn btn-ghost" onclick="openProductModalXD('Set Engranajes Industriales',49.99,'SolidWorks')">Detalles</button>
+                    <button class="btn btn-primary" style="flex:1" onclick="addToCart('Set Engranajes Industriales', 49.99, 'SolidWorks')">Agregar al Carrito</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Custom Orders -->
+<section class="custom-orders" id="custom">
+    <div class="custom-content">
+        <div class="custom-text">
+            <h2>¿No encuentras lo que buscas?</h2>
+            <p>Ofrecemos servicios de modelado 3D y diseño de planos personalizados según tus especificaciones exactas.</p>
+            <ul class="features-list">
+                <li>Modelos 3D paramétricos en SolidWorks</li>
+                <li>Planos técnicos detallados en AutoCAD</li>
+                <li>Documentación técnica completa</li>
+                <li>Revisiones ilimitadas incluidas</li>
+                <li>Entrega en 3-7 días hábiles</li>
+                <li>Formatos de archivo a elección</li>
+            </ul>
+            <a href="#contact" class="btn btn-primary">Solicitar Cotización</a>
+        </div>
+        <div class="custom-form">
+            <h3 style="margin-bottom: 2rem; color: #ffffff; font-size: 1.8rem;">Solicita tu Proyecto</h3>
+            <form>
+                <div class="form-group">
+                    <label for="name">Nombre Completo</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="software">Software Preferido</label>
+                    <select id="software" name="software">
+                        <option value="solidworks">SolidWorks</option>
+                        <option value="autocad">AutoCAD</option>
+                        <option value="ambos">Ambos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="project">Descripción del Proyecto</label>
+                    <textarea id="project" name="project" placeholder="Describe detalladamente qué necesitas..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer id="contact">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>CAD Assets Store</h3>
+            <p>Tu fuente confiable de modelos 3D y planos CAD profesionales. Calidad garantizada y soporte técnico incluido.</p>
+            <div class="social-links">
+                <a href="#">𝕏</a>
+                <a href="#">in</a>
+                <a href="#">fb</a>
+                <a href="#">ig</a>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h3>Categorías</h3>
+            <ul>
+                <li><a href="#">Planos Eléctricos</a></li>
+                <li><a href="#">Piezas Mecánicas</a></li>
+                <li><a href="#">Transformadores</a></li>
+                <li><a href="#">Tableros</a></li>
+                <li><a href="#">Motores</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Recursos</h3>
+            <ul>
+                <li><a href="#">Documentación</a></li>
+                <li><a href="#">Tutoriales</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Soporte</a></li>
+                <li><a href="#">Blog</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <ul>
+                <li><a href="mailto:info@cadassets.com">info@cadassets.com</a></li>
+                <li><a href="tel:+595000000000">+595 (000) 000-000</a></li>
+                <li>Lun - Vie: 9:00 - 18:00</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 CAD Assets Store. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+<script>
+    // Shopping Cart System
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function addToCart(name, price, format) {
+        const existingItem = cart.find(item => item.name === name);
+        
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ name, price, format, quantity: 1 });
+        }
+        
+        saveCart();
+        updateCart();
+        
+        // Show notification
+        showNotification(`${name} agregado al carrito!`);
+    }
+
+    function removeFromCart(name) {
+        cart = cart.filter(item => item.name !== name);
+        saveCart();
+        updateCart();
+    }
+
+    function updateQuantity(name, quantity) {
+        const item = cart.find(item => item.name === name);
+        if (item) {
+            item.quantity = Math.max(1, quantity);
+            if (item.quantity === 0) {
+                removeFromCart(name);
+            } else {
+                saveCart();
+                updateCart();
+            }
+        }
+    }
+
+    function saveCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    function updateCart() {
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartCount = document.getElementById('cart-count');
+        
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = `
+                <div class="cart-empty">
+                    <div style="font-size: 3rem;">🛍️</div>
+                    <p>Tu carrito está vacío</p>
+                </div>
+            `;
+            cartCount.style.display = 'none';
+        } else {
+            cartItemsContainer.innerHTML = cart.map((item, index) => `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <h3>${item.name}</h3>
+                        <p>${item.format}</p>
+                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                        <div class="cart-item-quantity">
+                            <button class="qty-btn" onclick="updateQuantity('${item.name}', ${item.quantity - 1})">−</button>
+                            <span class="qty-display">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity('${item.name}', ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <button class="cart-item-remove" onclick="removeFromCart('${item.name}')">🗑️</button>
+                </div>
+            `).join('');
+            
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.style.display = 'flex';
+        }
+        
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const tax = subtotal * 0.10;
+        const total = subtotal + tax;
+        
+        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+    }
+
+    function toggleCart() {
+        const cartModal = document.getElementById('cart-modal');
+        const cartOverlay = document.getElementById('cart-overlay');
+        
+        cartModal.classList.toggle('active');
+        cartOverlay.classList.toggle('active');
+    }
+
+    function checkout() {
+        if (cart.length === 0) {
+            alert('Tu carrito está vacío');
+            return;
+        }
+            window.location.href = 'checkout.html';
+    }
+
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Add slide animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize cart on page load
+    
+    // Product modal functions for xd.html
+    function openProductModalXD(name, price, format) {
+        // Force close cart
+        document.getElementById('cart-modal').classList.remove('active');
+        document.getElementById('cart-overlay').classList.remove('active');
+        
+        document.getElementById('xd-product-name').textContent = name;
+        document.getElementById('xd-product-desc').textContent = '';
+        document.getElementById('xd-product-price').textContent = '$' + price.toFixed(2);
+        document.getElementById('xd-product-meta').textContent = format;
+        const addBtn = document.getElementById('xd-modal-add-btn');
+        addBtn.onclick = function(){ addToCart(name, price, format); closeProductModal(); showNotification(name + ' agregado al carrito!'); };
+        
+        // Find product ID for detail page link
+        const productIds = {
+            'Plano Eléctrico Casa 3 Dormitorios': 1,
+            'Transformador Trifásico 500 KVA': 2,
+            'Set Engranajes Industriales': 3
+        };
+        const detailBtn = document.getElementById('xd-view-details-btn');
+        const pid = productIds[name];
+        if(pid) detailBtn.onclick = function(){ window.location.href = 'product-detail.html?id=' + pid; };
+        
+        const modal = document.getElementById('product-modal'); modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
+    }
+
+    function closeProductModal(){ const modal = document.getElementById('product-modal'); modal.classList.remove('active'); modal.setAttribute('aria-hidden','true'); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCart();
+
+        // Initialize search after DOM ready
+        const searchInput = document.getElementById('product-search');
+        if (searchInput) {
+            const debounce = (fn, wait) => {
+                let t;
+                return (...args) => {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), wait);
+                };
+            };
+
+            const filterProducts = (query) => {
+                const q = query.trim().toLowerCase();
+                const categoryCards = document.querySelectorAll('.categories-grid .category-card');
+                const assetCards = document.querySelectorAll('.featured-grid .asset-card');
+
+                const checkAndToggle = (el) => {
+                    const text = (el.innerText || '').toLowerCase();
+                    if (q === '' || text.indexOf(q) !== -1) {
+                        el.style.display = '';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                };
+
+                categoryCards.forEach(checkAndToggle);
+                assetCards.forEach(checkAndToggle);
+            };
+
+            searchInput.addEventListener('input', debounce((e) => {
+                filterProducts(e.target.value);
+            }, 200));
+        }
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('¡Gracias por tu solicitud! Te contactaremos pronto.');
+        this.reset();
+    });
+
+    // Animate on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.category-card, .asset-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+</body>
+</html>

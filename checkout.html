@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Checkout - CAD Assets Store</title>
+    <style>
+        :root{--bg:#0a0a0a;--panel:rgba(255,255,255,0.03);--accent1:#667eea;--accent2:#764ba2;--muted:#888;--success:#4ade80;--error:#ef4444}
+        *{box-sizing:border-box}
+        body{font-family:'Segoe UI',Tahoma,Arial;background:var(--bg);color:#fff;margin:0;padding:0}
+        header{position:fixed;top:0;width:100%;padding:.8rem 3%;background:rgba(10,10,10,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.06);z-index:100;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .back-btn{cursor:pointer;padding:.4rem .8rem;background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;border-radius:8px;font-size:.9rem}
+        .back-btn:hover{border-color:var(--accent1);color:var(--accent1)}
+        main{padding:80px 3% 40px;max-width:1400px;margin:0 auto}
+        .checkout-grid{display:grid;grid-template-columns:2fr 1fr;gap:3rem}
+        .form-section{background:var(--panel);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:2rem}
+        .form-section h2{margin:0 0 1.5rem;font-size:1.5rem}
+        .form-group{margin-bottom:1.5rem}
+        .form-group label{display:block;color:#b0b0b0;margin-bottom:.5rem;font-weight:500}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:1rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:1rem;transition:all .2s}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent1);background:rgba(255,255,255,0.08)}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .checkbox-group{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem}
+        .checkbox-group input[type="checkbox"]{width:18px;height:18px}
+        .checkbox-group label{margin:0;color:#b0b0b0;font-weight:400}
+        .payment-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+        .payment-method{background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s}
+        .payment-method:hover{border-color:var(--accent1)}
+        .payment-method.selected{border-color:var(--accent1);background:rgba(102,126,234,0.1)}
+        .payment-method svg{width:40px;height:40px;margin-bottom:.5rem}
+        .order-summary{background:var(--panel);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:2rem;position:sticky;top:100px}
+        .order-summary h3{margin:0 0 1.5rem;font-size:1.3rem}
+        .order-item{display:flex;gap:1rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .order-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+        .order-item img{width:60px;height:60px;border-radius:8px;background:linear-gradient(135deg,rgba(102,126,234,0.12),rgba(118,75,162,0.12));display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+        .order-item-info{flex:1}
+        .order-item-info h4{margin:0 0 .3rem;font-size:1rem;color:#fff}
+        .order-item-info p{margin:0;color:var(--muted);font-size:.9rem}
+        .order-item-price{color:var(--accent1);font-weight:700}
+        .summary-row{display:flex;justify-content:space-between;margin-bottom:.8rem;color:#b0b0b0}
+        .summary-total{display:flex;justify-content:space-between;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.1);font-size:1.2rem;font-weight:700;color:#fff}
+        .summary-total .amount{color:var(--accent1)}
+        .btn{cursor:pointer;border:none;border-radius:10px;padding:1rem 2rem;font-weight:600;font-size:1rem;transition:all .2s;text-align:center;text-decoration:none;display:inline-block}
+        .btn-primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff;width:100%;margin-top:2rem}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(102,126,234,0.3)}
+        .btn-primary:disabled{background:#666;cursor:not-allowed;transform:none;box-shadow:none}
+        .btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;margin-top:1rem;width:100%}
+        .btn-secondary:hover{border-color:var(--accent1);color:var(--accent1)}
+        .error-message{color:var(--error);font-size:.9rem;margin-top:.3rem;display:none}
+        .success-message{color:var(--success);font-size:.9rem;margin-top:.3rem;display:none}
+        .loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;align-items:center;justify-content:center;font-size:1.2rem}
+        .loading.show{display:flex}
+        .spinner{border:4px solid rgba(255,255,255,0.1);border-left:4px solid var(--accent1);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-right:1rem}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @media(max-width:1024px){.checkout-grid{grid-template-columns:1fr}.order-summary{position:static}}
+        @media(max-width:768px){.form-row{grid-template-columns:1fr}.payment-methods{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">trEdion CAD Assets Store</div>
+        <button class="back-btn" onclick="history.back()">← Continuar comprando</button>
+    </header>
+
+    <main>
+        <div class="checkout-grid">
+            <!-- Formulario de checkout -->
+            <div class="form-section">
+                <h2>Información de envío</h2>
+                <form id="checkout-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">Nombre *</label>
+                            <input type="text" id="first-name" name="firstName" required>
+                            <div class="error-message" id="first-name-error">Campo requerido</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Apellido *</label>
+                            <input type="text" id="last-name" name="lastName" required>
+                            <div class="error-message" id="last-name-error">Campo requerido</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error-message" id="email-error">Email inválido</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Teléfono *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                        <div class="error-message" id="phone-error">Campo requerido</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Empresa (opcional)</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Dirección *</label>
+                        <input type="text" id="address" name="address" placeholder="Calle, número, piso, etc." required>
+                        <div class="error-message" id="address-error">Campo requerido</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">Ciudad *</label>
+                            <input type="text" id="city" name="city" required>
+                            <div class="error-message" id="city-error">Campo requerido</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="postal-code">Código Postal *</label>
+                            <input type="text" id="postal-code" name="postalCode" required>
+                            <div class="error-message" id="postal-code-error">Campo requerido</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country">País *</label>
+                        <select id="country" name="country" required>
+                            <option value="">Seleccionar país</option>
+                            <option value="PY">Paraguay</option>
+                            <option value="AR">Argentina</option>
+                            <option value="BR">Brasil</option>
+                            <option value="UY">Uruguay</option>
+                            <option value="CL">Chile</option>
+                            <option value="BO">Bolivia</option>
+                        </select>
+                        <div class="error-message" id="country-error">Campo requerido</div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="billing-same" name="billingSame" checked>
+                        <label for="billing-same">La dirección de facturación es la misma que la de envío</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notas del pedido (opcional)</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Instrucciones especiales para la entrega..."></textarea>
+                    </div>
+
+                    <h2 style="margin-top:2rem">Método de pago</h2>
+                    <div class="payment-methods">
+                        <div class="payment-method selected" data-method="card">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                <line x1="2" y1="10" x2="22" y2="10"/>
+                            </svg>
+                            <div>Tarjeta de Crédito</div>
+                        </div>
+                        <div class="payment-method" data-method="paypal">
+                            <svg viewBox="0 0 24 24" fill="#0070ba">
+                                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.622 1.566 1.035.974 1.481 2.408 1.34 3.948-.173 1.92-.98 3.181-2.19 3.98-.6.39-1.36.64-2.22.73v.06c1.29.43 2.01 1.29 2.16 2.72.17 1.67-.44 3.19-1.68 4.1-1.11.81-2.8 1.22-4.83 1.22h-2.48c-.48 0-.85-.24-1.02-.73l-.74-2.28a.72.72 0 0 1 .7-.89h1.09c.57 0 .91.26 1.02.73l.55 1.7c.07.22.25.37.5.37h.84c.66 0 1.22-.19 1.6-.57.44-.43.67-1.15.6-2.1-.05-.78-.3-1.39-.75-1.81a2.41 2.41 0 0 0-1.65-.61h-.76a.69.69 0 0 1-.69-.74V8.4a.69.69 0 0 1 .7-.74h.76c1.79 0 3.24-.43 4.27-1.27 1.09-.9 1.65-2.29 1.57-4.07-.06-1.42-.49-2.58-1.29-3.45-.83-.89-2.15-1.33-3.98-1.33h-5.98c-.5 0-.94.4-1.02.9L6.736 20.6a.64.64 0 0 0 .633.74h.01Z"/>
+                            </svg>
+                            <div>PayPal</div>
+                        </div>
+                        <div class="payment-method" data-method="transfer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#764ba2" stroke-width="2">
+                                <path d="M3 7V5a2 2 0 0 1 2-2h2l2-2h4l2 2h2a2 2 0 0 1 2 2v2"/>
+                                <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"/>
+                                <path d="M12 12v5"/>
+                                <path d="M8 12v5"/>
+                                <path d="M16 12v5"/>
+                            </svg>
+                            <div>Transferencia</div>
+                        </div>
+                    </div>
+
+                    <div id="card-fields" style="margin-top:1.5rem">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="card-number">Número de tarjeta *</label>
+                                <input type="text" id="card-number" name="cardNumber" placeholder="1234 5678 9012 3456" required>
+                                <div class="error-message" id="card-number-error">Número inválido</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry">Fecha de expiración *</label>
+                                <input type="text" id="expiry" name="expiry" placeholder="MM/AA" required>
+                                <div class="error-message" id="expiry-error">Fecha inválida</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV *</label>
+                                <input type="text" id="cvv" name="cvv" placeholder="123" required>
+                                <div class="error-message" id="cvv-error">CVV inválido</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="card-name">Nombre en la tarjeta *</label>
+                            <input type="text" id="card-name" name="cardName" required>
+                            <div class="error-message" id="card-name-error">Campo requerido</div>
+                        </div>
+                    </div>
+
+                    <div id="paypal-fields" style="display:none;margin-top:1.5rem;text-align:center;color:var(--muted)">
+                        Serás redirigido a PayPal para completar el pago de forma segura.
+                    </div>
+
+                    <div id="transfer-fields" style="display:none;margin-top:1.5rem;padding:1rem;background:rgba(118,75,162,0.1);border:1px solid rgba(118,75,162,0.3);border-radius:8px">
+                        <h4 style="margin:0 0 1rem;color:#764ba2">Datos bancarios</h4>
+                        <p style="margin:0 0 .5rem;color:#b0b0b0"><strong>Banco:</strong> Banco Nacional de Fomento</p>
+                        <p style="margin:0 0 .5rem;color:#b0b0b0"><strong>Cuenta:</strong> 123-456-789</p>
+                        <p style="margin:0 0 .5rem;color:#b0b0b0"><strong>RUC:</strong> 1234567-8</p>
+                        <p style="margin:0 0 .5rem;color:#b0b0b0"><strong>Beneficiario:</strong> trEdion CAD Assets Store</p>
+                        <p style="margin:0;color:#888;font-size:.9rem">Envía el comprobante de pago a info@cadassets.com</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Completar pedido</button>
+                </form>
+            </div>
+
+            <!-- Resumen del pedido -->
+            <div class="order-summary">
+                <h3>Resumen del pedido</h3>
+                <div id="order-items"></div>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="summary-subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Envío:</span>
+                    <span id="summary-shipping">Gratis</span>
+                </div>
+                <div class="summary-row">
+                    <span>Impuesto (10%):</span>
+                    <span id="summary-tax">$0.00</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span class="amount" id="summary-total">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading overlay -->
+    <div class="loading" id="loading">
+        <div style="display:flex;align-items:center;color:#fff">
+            <div class="spinner"></div>
+            Procesando pedido...
+        </div>
+    </div>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let selectedPayment = 'card';
+
+        // Redirect if cart is empty
+        if(!cart.length) {
+            alert('Tu carrito está vacío');
+            window.location.href = 'xd.html';
+        }
+
+        function init() {
+            renderOrderSummary();
+            setupPaymentMethods();
+            setupFormValidation();
+        }
+
+        function renderOrderSummary() {
+            const container = document.getElementById('order-items');
+            container.innerHTML = '';
+
+            cart.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'order-item';
+                itemEl.innerHTML = `
+                    <div class="order-item img">🧩</div>
+                    <div class="order-item-info">
+                        <h4>${item.name}</h4>
+                        <p>${item.format} • Cantidad: ${item.quantity}</p>
+                    </div>
+                    <div class="order-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                `;
+                container.appendChild(itemEl);
+            });
+
+            updateTotals();
+        }
+
+        function updateTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50
+            const tax = (subtotal + shipping) * 0.10;
+            const total = subtotal + shipping + tax;
+
+            document.getElementById('summary-subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('summary-shipping').textContent = shipping === 0 ? 'Gratis' : '$' + shipping.toFixed(2);
+            document.getElementById('summary-tax').textContent = '$' + tax.toFixed(2);
+            document.getElementById('summary-total').textContent = '$' + total.toFixed(2);
+        }
+
+        function setupPaymentMethods() {
+            const methods = document.querySelectorAll('.payment-method');
+            methods.forEach(method => {
+                method.addEventListener('click', () => {
+                    methods.forEach(m => m.classList.remove('selected'));
+                    method.classList.add('selected');
+                    selectedPayment = method.dataset.method;
+                    showPaymentFields();
+                });
+            });
+        }
+
+        function showPaymentFields() {
+            document.getElementById('card-fields').style.display = selectedPayment === 'card' ? 'block' : 'none';
+            document.getElementById('paypal-fields').style.display = selectedPayment === 'paypal' ? 'block' : 'none';
+            document.getElementById('transfer-fields').style.display = selectedPayment === 'transfer' ? 'block' : 'none';
+        }
+
+        function setupFormValidation() {
+            const form = document.getElementById('checkout-form');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', clearError);
+            });
+
+            form.addEventListener('submit', handleSubmit);
+        }
+
+        function validateField(e) {
+            const field = e.target;
+            const errorEl = document.getElementById(field.id + '-error');
+            let isValid = true;
+            let message = '';
+
+            switch(field.id) {
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    isValid = emailRegex.test(field.value);
+                    message = 'Email inválido';
+                    break;
+                case 'card-number':
+                    const cardRegex = /^\d{4}\s?\d{4}\s?\d{4}\s?\d{4}$/;
+                    isValid = cardRegex.test(field.value.replace(/\s/g, ''));
+                    message = 'Número de tarjeta inválido';
+                    break;
+                case 'expiry':
+                    const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+                    isValid = expiryRegex.test(field.value);
+                    message = 'Formato MM/AA requerido';
+                    break;
+                case 'cvv':
+                    isValid = /^\d{3,4}$/.test(field.value);
+                    message = 'CVV inválido';
+                    break;
+                default:
+                    isValid = field.value.trim().length > 0;
+                    message = 'Campo requerido';
+            }
+
+            if(!isValid && field.value.trim()) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+                field.style.borderColor = 'var(--error)';
+            } else if(!field.value.trim() && field.hasAttribute('required')) {
+                errorEl.textContent = 'Campo requerido';
+                errorEl.style.display = 'block';
+                field.style.borderColor = 'var(--error)';
+            } else {
+                errorEl.style.display = 'none';
+                field.style.borderColor = 'rgba(255,255,255,0.1)';
+            }
+
+            return isValid;
+        }
+
+        function clearError(e) {
+            const field = e.target;
+            const errorEl = document.getElementById(field.id + '-error');
+            errorEl.style.display = 'none';
+            field.style.borderColor = 'rgba(255,255,255,0.1)';
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+
+            // Validate all required fields
+            const requiredFields = document.querySelectorAll('input[required], select[required]');
+            let allValid = true;
+
+            requiredFields.forEach(field => {
+                if(!validateField({target: field})) {
+                    allValid = false;
+                }
+            });
+
+            if(!allValid) {
+                alert('Por favor completa todos los campos requeridos correctamente.');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').textContent = 'Procesando...';
+
+            // Simulate payment processing
+            setTimeout(() => {
+                // Generate order number
+                const orderNumber = 'ORD-' + Date.now();
+
+                // Save order to localStorage (in real app, this would be sent to server)
+                const order = {
+                    orderNumber,
+                    items: cart,
+                    customer: {
+                        firstName: document.getElementById('first-name').value,
+                        lastName: document.getElementById('last-name').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        company: document.getElementById('company').value,
+                        address: document.getElementById('address').value,
+                        city: document.getElementById('city').value,
+                        postalCode: document.getElementById('postal-code').value,
+                        country: document.getElementById('country').value,
+                        notes: document.getElementById('notes').value
+                    },
+                    payment: {
+                        method: selectedPayment,
+                        amount: parseFloat(document.getElementById('summary-total').textContent.replace('$', ''))
+                    },
+                    date: new Date().toISOString(),
+                    status: 'confirmed'
+                };
+
+                // Save order history
+                const orders = JSON.parse(localStorage.getItem('orders')) || [];
+                orders.push(order);
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                // Clear cart
+                localStorage.removeItem('cart');
+                cart = [];
+
+                // Redirect to success page
+                window.location.href = 'order-success.html?order=' + orderNumber;
+            }, 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

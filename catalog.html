@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Catálogo - CAD Assets Store</title>
+    <style>
+        :root{--bg:#0a0a0a;--panel:rgba(255,255,255,0.03);--accent1:#667eea;--accent2:#764ba2;--muted:#888}
+        *{box-sizing:border-box}
+        body{font-family:Segoe UI, Tahoma, Arial;background:var(--bg);color:#fff;margin:0}
+        header{padding:1rem 3%;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .logo{font-weight:700;background:linear-gradient(135deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-actions{margin-left:auto;display:flex;align-items:center;gap:1rem}
+        .search-input{padding:.6rem .9rem;border-radius:999px;background:var(--panel);border:1px solid rgba(255,255,255,0.06);color:#fff;width:320px}
+        .container{display:flex;gap:2rem;padding:2rem 3%}
+        .filters{width:300px;background:rgba(255,255,255,0.02);padding:1.2rem;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+        .filters h3{margin-bottom:.6rem}
+        .filter-group{margin-bottom:1rem}
+        .assets-wrap{flex:1}
+        .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:1rem}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+        .asset-card{background:var(--panel);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:.6rem}
+        .asset-meta{display:flex;justify-content:space-between;align-items:center}
+        .asset-badge{background:rgba(102,126,234,0.12);color:var(--accent1);padding:.3rem .6rem;border-radius:999px;font-size:.8rem}
+        .btn{cursor:pointer;border:none;border-radius:10px;padding:.6rem .8rem;font-weight:600}
+        .btn-primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff}
+        .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff}
+        .price{font-weight:700;color:var(--accent1)}
+        .empty{color:var(--muted);text-align:center;padding:3rem}
+        /* Cart modal (simple reuse) */
+        .cart-icon{position:relative;cursor:pointer}
+        .cart-count{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,var(--accent1),var(--accent2));width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff}
+        .cart-modal{position:fixed;right:-420px;top:0;width:420px;height:100vh;background:rgba(10,10,10,0.98);border-left:1px solid rgba(255,255,255,0.06);z-index:999;transition:right .28s;display:flex;flex-direction:column}
+        .cart-modal.active{right:0}
+        .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:998}
+        .cart-overlay.active{opacity:1;pointer-events:auto}
+        .cart-header{padding:1.2rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center}
+        .cart-items{padding:1rem;overflow:auto;flex:1}
+        .cart-footer{padding:1rem;border-top:1px solid rgba(255,255,255,0.06)}
+        @media(max-width:900px){.container{flex-direction:column}.filters{width:100%}.search-input{width:180px}}
+
+        /* Product detail modal */
+        .product-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:99999}
+        .product-modal.open{display:flex}
+        .product-modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7)}
+        .product-modal-panel{position:relative;background:var(--panel);width:min(920px,95%);max-height:90vh;overflow:auto;padding:1.2rem;border-radius:12px;border:1px solid rgba(255,255,255,0.06);z-index:2}
+        .product-modal-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem}
+        .product-modal-body{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .product-image-placeholder{height:220px;border-radius:8px;background:linear-gradient(135deg,rgba(102,126,234,0.12),rgba(118,75,162,0.12));display:flex;align-items:center;justify-content:center;font-size:3rem}
+        .product-info h2{margin:0 0 .5rem}
+        .product-info p{color:var(--muted)}
+        .product-info .price{font-size:1.6rem;margin-top:1rem}
+        @media(max-width:700px){.product-modal-body{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">trEdion CAD Assets Store</div>
+        <div class="top-actions">
+            <input id="search" class="search-input" placeholder="Buscar assets, formato o palabra clave..." aria-label="Buscar">
+            <div class="cart-icon" onclick="toggleCart()">🛒<div id="cart-count" class="cart-count" style="display:none">0</div></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <aside class="filters" aria-label="Filtros">
+            <h3>Filtros</h3>
+            <div class="filter-group">
+                <strong>Categorías</strong>
+                <div id="categories-list" style="margin-top:.6rem"></div>
+            </div>
+            <div class="filter-group">
+                <strong>Formato</strong>
+                <select id="format-filter" style="width:100%;margin-top:.5rem;padding:.5rem;border-radius:8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06)">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <strong>Precio</strong>
+                <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem">
+                    <input id="price-min" type="number" placeholder="min" style="width:100%;padding:.5rem;border-radius:8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06)">
+                    <input id="price-max" type="number" placeholder="max" style="width:100%;padding:.5rem;border-radius:8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06)">
+                </div>
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:.5rem">
+                <button id="apply-filters" class="btn btn-ghost">Aplicar</button>
+                <button id="clear-filters" class="btn btn-ghost">Limpiar</button>
+            </div>
+        </aside>
+
+        <section class="assets-wrap">
+            <div class="controls">
+                <div id="result-count" style="color:var(--muted)"></div>
+                <div style="display:flex;gap:.5rem">
+                    <select id="sort" style="padding:.5rem;border-radius:8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06)">
+                        <option value="relevance">Relevancia</option>
+                        <option value="price-asc">Precio: menor</option>
+                        <option value="price-desc">Precio: mayor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="assets-grid" class="grid"></div>
+            <div id="no-results" class="empty" style="display:none">No se encontraron resultados.</div>
+        </section>
+    </main>
+
+    <!-- Cart modal -->
+    <div id="cart-overlay" class="cart-overlay" onclick="toggleCart()"></div>
+    <aside id="cart-modal" class="cart-modal" aria-hidden="true">
+        <div class="cart-header"><strong>Mi Carrito</strong><button onclick="toggleCart()" class="btn btn-ghost">✕</button></div>
+        <div id="cart-items" class="cart-items"><div class="empty">Tu carrito está vacío</div></div>
+        <div class="cart-footer">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.6rem"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.6rem"><span>Impuesto (10%)</span><span id="tax">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:.6rem"><span>Total</span><span id="total">$0.00</span></div>
+            <div style="display:flex;gap:.5rem"><button class="btn btn-ghost" onclick="toggleCart()">Seguir comprando</button><button class="btn btn-primary" onclick="checkout()">Checkout</button></div>
+        </div>
+    </aside>
+
+    <!-- Product Detail Modal -->
+    <div id="product-modal" class="product-modal" aria-hidden="true">
+        <div class="product-modal-overlay" onclick="closeProductModal()"></div>
+        <div class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+            <div class="product-modal-header">
+                <h2 id="product-modal-title">Detalle del producto</h2>
+                <div>
+                    <button class="btn btn-ghost" onclick="closeProductModal()">✕</button>
+                </div>
+            </div>
+            <div class="product-modal-body">
+                <div class="product-media">
+                    <div id="product-image" class="product-image-placeholder">🧩</div>
+                </div>
+                <div class="product-info">
+                    <h2 id="product-name"></h2>
+                    <div id="product-meta" style="color:var(--muted);margin-bottom:.6rem"></div>
+                    <p id="product-desc"></p>
+                    <div class="price" id="product-price" style="margin-top:1rem"></div>
+                    <div style="margin-top:1rem;display:flex;gap:.6rem">
+                        <button id="modal-add-btn" class="btn btn-primary">Agregar al carrito</button>
+                        <button class="btn btn-ghost" onclick="closeProductModal()">Cerrar</button>
+                    </div>
+                    <button id="modal-details-btn" class="btn" style="width:100%;margin-top:.8rem;background:transparent;border:1px solid rgba(102,126,234,0.3);color:#667eea">Ver detalles completos →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample assets data
+        const assets = [
+            {id:1,name:'Plano Eléctrico Casa 3 Dormitorios',price:29.99,category:'Planos Eléctricos',format:'DWG',desc:'Instalación eléctrica completa, incluye iluminación, tomacorrientes.',images:['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400','https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400']},
+            {id:2,name:'Transformador Trifásico 500 KVA',price:79.99,category:'Transformadores',format:'SLDPRT',desc:'Modelo 3D completo con ensamblaje y planos técnicos.',images:['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400','https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400']},
+            {id:3,name:'Set Engranajes Industriales',price:49.99,category:'Piezas Mecánicas',format:'SLDPRT',desc:'20 engranajes rectos y helicoidales, diferentes módulos.',images:['https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400','https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400']},
+            {id:4,name:'Gabinete Tablero 24U',price:59.50,category:'Tableros Eléctricos',format:'DWG',desc:'Gabinete de distribución con espacio para componentes.',images:['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400','https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400']},
+            {id:5,name:'Motor Eléctrico AC 5kW',price:99.99,category:'Motores Eléctricos',format:'SLDPRT',desc:'Motor AC con caracteristicas técnicas y dimensiones.',images:['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400','https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400']},
+            {id:6,name:'Sistema de Tuberías PVC',price:19.99,category:'Sistemas de Tuberías',format:'DWG',desc:'Conjunto de codos, tees y bridas para instalaciones.',images:['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400','https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400']}
+        ];
+
+        // --- Filters state ---
+        let state = {query:'',categories:new Set(),format:'',minPrice:null,maxPrice:null,sort:'relevance'};
+
+        // Utilities
+        const $ = sel => document.querySelector(sel);
+        const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+        // Render categories list
+        function initFilters(){
+            const cats = [...new Set(assets.map(a=>a.category))];
+            const container = document.getElementById('categories-list');
+            container.innerHTML = '';
+            cats.forEach(cat=>{
+                const id = 'cat-'+cat.replace(/\s+/g,'-');
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `<label style="display:flex;align-items:center;gap:.5rem"><input type=checkbox data-cat="${cat}" id="${id}"> <span>${cat}</span></label>`;
+                container.appendChild(wrapper);
+            });
+
+            // formats
+            const formats = [...new Set(assets.map(a=>a.format))];
+            const formatSelect = document.getElementById('format-filter');
+            formats.forEach(f=>{
+                const opt = document.createElement('option'); opt.value=f; opt.textContent=f; formatSelect.appendChild(opt);
+            });
+
+            // price defaults
+            const prices = assets.map(a=>a.price);
+            $('#price-min').placeholder = Math.min(...prices).toFixed(2);
+            $('#price-max').placeholder = Math.max(...prices).toFixed(2);
+        }
+
+        // Render assets grid based on filters
+        function renderAssets(list){
+            const grid = document.getElementById('assets-grid');
+            grid.innerHTML = '';
+            if(!list.length){ $('#no-results').style.display='block'; $('#result-count').textContent='0 resultados'; return; }
+            $('#no-results').style.display='none';
+            $('#result-count').textContent = `${list.length} resultados`;
+            list.forEach(a=>{
+                const div = document.createElement('div'); div.className='asset-card';
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="display:flex;align-items:center;gap:.6rem">
+                            <img src="${a.images[0]}" style="width:44px;height:44px;border-radius:8px;object-fit:cover" alt="${a.name}">
+                            <div>
+                                <div style="font-weight:700">${a.name}</div>
+                                <div style="color:var(--muted);font-size:.9rem">${a.category} • ${a.format}</div>
+                            </div>
+                        </div>
+                        <div class="price">$${a.price.toFixed(2)}</div>
+                    </div>
+                    <p style="color:var(--muted);font-size:.95rem;margin-top:.5rem">${a.desc}</p>
+                    <div style="margin-top:auto;display:flex;gap:.5rem">
+                        <button class="btn btn-ghost" onclick="viewDetails(${a.id})">Detalles</button>
+                        <button class="btn btn-primary" onclick="addToCartFromCatalog(${a.id})">Agregar al carrito</button>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // Apply filters
+        function applyFilters(){
+            let res = assets.slice();
+            const q = state.query.trim().toLowerCase();
+            if(q){ res = res.filter(a => (a.name+ ' '+a.desc+' '+a.category+' '+a.format).toLowerCase().includes(q)); }
+            if(state.categories.size){ res = res.filter(a => state.categories.has(a.category)); }
+            if(state.format){ res = res.filter(a => a.format === state.format); }
+            if(state.minPrice !== null){ res = res.filter(a => a.price >= state.minPrice); }
+            if(state.maxPrice !== null){ res = res.filter(a => a.price <= state.maxPrice); }
+
+            // sort
+            if(state.sort === 'price-asc') res.sort((x,y)=>x.price-y.price);
+            if(state.sort === 'price-desc') res.sort((x,y)=>y.price-x.price);
+
+            renderAssets(res);
+        }
+
+        // Events hookup
+        function hookup(){
+            // search
+            const search = document.getElementById('search');
+            const debounce = (fn,wait)=>{let t;return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),wait)}};
+            search.addEventListener('input', debounce((e)=>{ state.query = e.target.value; applyFilters(); },200));
+
+            // categories
+            document.getElementById('categories-list').addEventListener('change', (e)=>{
+                if(e.target.matches('input[type="checkbox"]')){
+                    const cat = e.target.dataset.cat;
+                    if(e.target.checked) state.categories.add(cat); else state.categories.delete(cat);
+                }
+            });
+
+            // format
+            document.getElementById('format-filter').addEventListener('change', (e)=>{ state.format = e.target.value; applyFilters(); });
+
+            // price inputs
+            document.getElementById('apply-filters').addEventListener('click', ()=>{
+                const min = parseFloat(document.getElementById('price-min').value);
+                const max = parseFloat(document.getElementById('price-max').value);
+                state.minPrice = isNaN(min)?null:min; state.maxPrice = isNaN(max)?null:max; applyFilters();
+            });
+            document.getElementById('clear-filters').addEventListener('click', ()=>{ state={query:'',categories:new Set(),format:'',minPrice:null,maxPrice:null,sort:'relevance'}; document.getElementById('search').value=''; $$('#categories-list input').forEach(i=>i.checked=false); document.getElementById('format-filter').value=''; document.getElementById('price-min').value=''; document.getElementById('price-max').value=''; document.getElementById('sort').value='relevance'; applyFilters(); });
+
+            // sort
+            document.getElementById('sort').addEventListener('change',(e)=>{ state.sort=e.target.value; applyFilters(); });
+
+            // delegation for dynamic asset buttons
+            // handled by inline onclicks addToCartFromCatalog
+        }
+
+        // --- Cart logic (shared with xd.html via localStorage 'cart') ---
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function saveCart(){ localStorage.setItem('cart', JSON.stringify(cart)); }
+        function updateCartUI(){
+            const container = document.getElementById('cart-items');
+            const countEl = document.getElementById('cart-count');
+            if(!cart.length){ container.innerHTML='<div class="empty">Tu carrito está vacío</div>'; countEl.style.display='none'; } else {
+                container.innerHTML=''; cart.forEach(item=>{
+                    const el = document.createElement('div'); el.style.display='flex'; el.style.justifyContent='space-between'; el.style.alignItems='center'; el.style.padding='.6rem 0';
+                    el.innerHTML = `<div><div style="font-weight:700">${item.name}</div><div style="color:var(--muted);font-size:.9rem">${item.format}</div></div><div style="text-align:right"><div style="color:var(--accent1);font-weight:700">$${(item.price*item.quantity).toFixed(2)}</div><div style="font-size:.9rem;color:var(--muted)"><button class='btn btn-ghost' style='padding:.2rem .4rem;margin-right:.3rem' onclick="decreaseQty(${item.id})">-</button>${item.quantity}<button class='btn btn-ghost' style='padding:.2rem .4rem;margin-left:.3rem' onclick="increaseQty(${item.id})">+</button><button class='btn' style='background:transparent;border:none;color:#ff6b6b;margin-left:.6rem' onclick="removeFromCart(${item.id})">🗑️</button></div></div>`;
+                    container.appendChild(el);
+                });
+                countEl.style.display='flex'; countEl.textContent = cart.reduce((s,i)=>s+i.quantity,0);
+            }
+            updateSummary();
+        }
+
+        function addToCartFromCatalog(id){ const a = assets.find(x=>x.id===id); addToCart(a.name,a.price,a.format,id); showToast(a.name + ' agregado al carrito'); }
+        function addToCart(name,price,format,id){ const existing = cart.find(i=>i.id===id); if(existing) existing.quantity++; else cart.push({id,name,price,format,quantity:1}); saveCart(); updateCartUI(); }
+        function removeFromCart(id){ cart = cart.filter(i=>i.id!==id); saveCart(); updateCartUI(); }
+        function increaseQty(id){ const it = cart.find(i=>i.id===id); if(it){ it.quantity++; saveCart(); updateCartUI(); } }
+        function decreaseQty(id){ const it = cart.find(i=>i.id===id); if(it){ it.quantity = Math.max(1,it.quantity-1); saveCart(); updateCartUI(); } }
+        function updateSummary(){ const subtotal = cart.reduce((s,i)=>s + i.price*i.quantity,0); const tax = subtotal*0.10; const total = subtotal + tax; $('#subtotal').textContent = '$'+subtotal.toFixed(2); $('#tax').textContent = '$'+tax.toFixed(2); $('#total').textContent = '$'+total.toFixed(2); }
+        function toggleCart(){ $('#cart-modal').classList.toggle('active'); $('#cart-overlay').classList.toggle('active'); }
+        function checkout(){ if(!cart.length){ alert('Tu carrito está vacío'); return;} window.location.href = 'checkout.html'; }
+
+        function showToast(msg){ const n = document.createElement('div'); n.textContent = msg; n.style.cssText='position:fixed;top:90px;right:20px;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff;padding:.8rem 1rem;border-radius:8px;z-index:2000'; document.body.appendChild(n); setTimeout(()=>{ n.style.opacity=0; setTimeout(()=>n.remove(),300) },2200); }
+
+        // Product detail modal handlers
+        function viewDetails(id){ const a = assets.find(x=>x.id===id); if(a) openProductModal(a); }
+
+        function openProductModal(asset){
+            // Force close cart
+            document.getElementById('cart-modal').classList.remove('active');
+            document.getElementById('cart-overlay').classList.remove('active');
+            
+            document.getElementById('product-name').textContent = asset.name;
+            document.getElementById('product-desc').textContent = asset.desc || '';
+            document.getElementById('product-price').textContent = '$' + asset.price.toFixed(2);
+            document.getElementById('product-meta').textContent = asset.category + ' • ' + asset.format;
+            // attach add-to-cart handler
+            const addBtn = document.getElementById('modal-add-btn');
+            addBtn.onclick = function(){ addToCart(asset.name, asset.price, asset.format, asset.id); closeProductModal(); showToast(asset.name + ' agregado al carrito'); };
+            
+            // Link to detail page
+            const detailBtn = document.getElementById('modal-details-btn');
+            detailBtn.onclick = function(){ window.location.href = 'product-detail.html?id=' + asset.id; };
+            
+            // open modal
+            const pm = document.getElementById('product-modal'); pm.classList.add('open'); pm.setAttribute('aria-hidden','false');
+        }
+
+        function closeProductModal(){ const pm = document.getElementById('product-modal'); pm.classList.remove('open'); pm.setAttribute('aria-hidden','true'); }
+
+        // Init
+        initFilters(); hookup();
+
+        // Apply filters from URL params (e.g. ?category=Planos%20El%C3%A9ctricos&format=DWG&query=plano)
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('category')) {
+            const catParam = params.get('category');
+            // support comma-separated list
+            const cats = catParam.split(',').map(s => s.trim()).filter(Boolean);
+            cats.forEach(c => {
+                state.categories.add(c);
+                const checkbox = document.querySelector(`#categories-list input[data-cat]`);
+                // find exact matching input
+                const match = Array.from(document.querySelectorAll('#categories-list input')).find(i => i.dataset.cat === c);
+                if (match) match.checked = true;
+            });
+        }
+        if (params.has('format')) {
+            const f = params.get('format');
+            state.format = f;
+            const sel = document.getElementById('format-filter'); if (sel) sel.value = f;
+        }
+        if (params.has('query')) {
+            const q = params.get('query'); state.query = q; const s = document.getElementById('search'); if (s) s.value = q;
+        }
+        if (params.has('minPrice')) { const v = parseFloat(params.get('minPrice')); if (!isNaN(v)) state.minPrice = v; document.getElementById('price-min').value = params.get('minPrice'); }
+        if (params.has('maxPrice')) { const v = parseFloat(params.get('maxPrice')); if (!isNaN(v)) state.maxPrice = v; document.getElementById('price-max').value = params.get('maxPrice'); }
+
+        // initial sort param
+        if (params.has('sort')) { state.sort = params.get('sort'); const s = document.getElementById('sort'); if (s) s.value = state.sort; }
+
+        applyFilters(); updateCartUI();
+
+    </script>
+</body>
+</html>
